@@ -47,6 +47,7 @@ vm._isVue = true;
 `obsever`的时候就知道了
 
 ## 合并选项
+
 接下来继续看下面的代码,下面这段代码主要讲的就是合并`options`参数的.
 ```js
 if (options && options._isComponent) {
@@ -67,7 +68,9 @@ if (options && options._isComponent) {
 可以看到这里产生了不同的情况,一种是`options`参数传入了&&`_isComponent`属性为`true`时做的处理,另一种就是没有或为false做的处理。
 首先来讲下第一种,看到这个你会发现不对啊,我在官方文档中没看到这个属性啊,难道是内部的属性？确实是一个内部的属性,这个是创建组件的时候
 会生成的,这里不在多讲,等用到的时候在讲。
+
 ###选项的来源
+
 那么现在主要讲第二种情况,可以看到它是执行了`mergeOptions`函数,其参数分别是:`resolveConstructorOptions(vm.constructor)`和创建
 实例时传入的参数`options`,最后将该函数返回的值赋值给实例的`$options`属性。首先来看下第一个参数:
 ```js
@@ -86,7 +89,9 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
 个参数。诶,这个`super`属性我记得初始化的时候没有啊,哪里来的？这里可以提前说一下,这个是在调用`Vue.extend`函数的时候会生成的,具体
 用到的时候在讲,在这个例子中是没有`super`属性的,所以最后的结果就是输出`Vue`函数的`options`属性.接下来就可以看`mergeOptions`这个
 函数都干了些什么,这个函数来源于`/core/util/options.js`这个文件.
+
 ###检查组件名称是否符合要求
+
 ```js
 if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)//检验组件名和标签并给予相应冲突的警告
@@ -123,7 +128,9 @@ export function validateComponentName (name: string) {
 ```
 可以看到这个函数的作用就是检测组件名是否合格并且是否与`slot`、`component`、`html`标签和`svg`标签名冲突.那么`checkComponents`函数
 就是检测所有的子组件名是否符合要求的。
+
 ###选项可以是构造函数
+
 现在在回到`mergeOptions`函数中来,接下来看其后面的代码:
 ```js
 if (typeof child === 'function') {
@@ -134,6 +141,7 @@ if (typeof child === 'function') {
 不管是`vue.extend`生成的还是`Vue`函数都是带有options属性的,在现在这个例子中可以忽略。
 
 ###规范化props
+
 那么现在继续往下看: 
 ```js
 normalizeProps(child, vm) //规范化props
