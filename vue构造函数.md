@@ -163,7 +163,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
 ```
 可以看到其实就是未原型添加了`_update`、`$forceUpdate`、`$destroy`这三个函数,同样这三个函数时用来干什么的呢?
 
-`_update`: 对改变的节点进行更新
+`_update`: 将虚拟DOM渲染为真实DOM
 
 `$forceUpdate`: 强制重新渲染(其实就是重新执行渲染函数)
 
@@ -187,7 +187,7 @@ export function renderMixin (Vue: Class<Component>) {
 `$nextTick`: 可以看到其调用的是nextTick函数,而这个函数的作用主要就是等所有的同步任务执行完以后再执行其传入的回调函数,
 同时这个函数又可以使视图强制重新渲染一遍(具体等用到了在讲)
 
-`_render`: 执行render函数生成节点
+`_render`: 执行render函数生成虚拟节点
 
 还有一个就是`installRenderHelpers`函数,这个函数传入了`vue`原型为参数,具体做了什么呢？
 ```js
