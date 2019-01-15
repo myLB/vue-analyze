@@ -132,6 +132,7 @@ if (typeof child === 'function') {
 ```
 这段代码是为了其他地方做的兼容,在Vue源码中这个函数会在多个地方用到,现在可以提一笔就是`mergeOptions`函数第二个参数可以是构造函数,
 不管是`vue.extend`生成的还是`Vue`函数都是带有options属性的,在现在这个例子中可以忽略。
+
 ###规范化props
 那么现在继续往下看: 
 ```js
