@@ -138,7 +138,7 @@ if (typeof child === 'function') {
 }
 ```
 这段代码是为了其他地方做的兼容,在Vue源码中这个函数会在多个地方用到,现在可以提一笔就是`mergeOptions`函数第二个参数可以是构造函数,
-不管是`vue.extend`生成的还是`Vue`函数都是带有options属性的,在现在这个例子中可以忽略。
+不管是`vue.extend`生成的还是`Vue`函数都是带有`options`属性的,在现在这个例子中可以忽略。
 
 ### 规范化props
 
@@ -188,7 +188,7 @@ function normalizeProps (options: Object, vm: ?Component) {
 }
 ```
 可以看到第一段代码获取的是传入参数的`props`属性,在我们的例子中并没有,那就直接结束了该函数。不过不要紧,我们可以把平时的组件拿来当例子嘛!
-初始化了一个res对象,然后看到上面的代码对`props`属性的两种形式分别作了处理: 数组形式和对象形式。那么分别来讲下:
+初始化了一个`res`对象,然后看到上面的代码对`props`属性的两种形式分别作了处理: 数组形式和对象形式。那么分别来讲下:
 
 <font color=red size=3 face="黑体">看到的工具函数我就不说了,自己去`shared/util.js`文件中去找,我只说这个工具函数时干什么用的</font>
 
@@ -197,7 +197,149 @@ function normalizeProps (options: Object, vm: ?Component) {
                表示没有类型限制,父组件可以传任何类型的值,没有要求。
            否: 提示错误信息'使用数组语法时，数组各项必须是字符串'
 
-    2、对象形式: 
+    2、对象形式: 循环该对象属性名,获取属性值,将属性名的驼峰写法改成 kebab-case (短横线分隔命名)写法并作为res对象的属性,
+                然后判断属性值是否为纯对象类型[object Object]:
+                     是: 直接作为res[属性名]的值
+                     否: res[属性名] = {type: 属性值}
+                                         
+为对象形式的举个例子:
+```js
+props: {
+    count: Number
+}
+//规范化后...
+props: {
+    count: {
+        type: Number
+    }
+}
+```
+上面就是对两种形式的处理,如果两者都不符合,那么就会进入最后了情况(前提在非生产环境下),该情况只做一件事,就是打印警告信息'选项`props`的值无效:
+期望得到一个数组或对象，但得到其他类型'。最后就是将处理完后的`res`对象赋值给传入参数的`props`属性。到这里就将`props`规范化了。
+
+### 规范化Inject
+
+上面已经规范化了`props`,那么继续往下看:
+```js
+normalizeInject(child, vm) //规范化Inject
+```                   
+执行了`normalizeInject`这个函数并传入了2个参数,这两个参数和`normalizeProps`传入的参数一样,这里就不讲了。直接去看代码:
+```js
+function normalizeInject (options: Object, vm: ?Component) {
+  const inject = options.inject //缓存参数中的inject属性
+  if (!inject) return
+  const normalized = options.inject = {} //清空参数中的inject属性
+  //inject属性为数组类型
+  if (Array.isArray(inject)) {
+    for (let i = 0; i < inject.length; i++) {
+      normalized[inject[i]] = { from: inject[i] }
+    }
+    /*将inject转换成标准的格式 val: {
+      from: 'val'  //匹配父组件中的provide的key名
+    }*/
+  } else if (isPlainObject(inject)) {
+    //inject为对象格式，遍历对象
+    for (const key in inject) {
+      const val = inject[key] //获取key值
+      //判断key值是否为对象,是对象则将标准格式与值合并，否则转换成标准格式
+      normalized[key] = isPlainObject(val)
+        ? extend({ from: key }, val)
+        : { from: val }
+    }
+  } else if (process.env.NODE_ENV !== 'production') {
+    warn(
+      `Invalid value for option "inject": expected an Array or an Object, ` +
+      `but got ${toRawType(inject)}.`,
+      vm
+    )
+  }
+}
+```
+同样在这个例子中也没有`inject`属性,当然这个属性也比较不常见,好像很少用到,在这里就说一下它的用途:
+     
+     它是和当前组件的祖先组件实例的provide属性配合着用的,provide属性里面的值用于传递给子孙组件的,而inject属性就是接收器,
+     里面定义子孙组件需要的数据,当然这个接手值只能读取不能修改,修改了就会打印警告信息。
+
+那么作用也知道了,现在就来具体看下这个函数做了什么？首先第一段代码就是缓存`inject`属性,然后将该属性值重置为一个空对象,接着又
+是处理2种形式的情况:
+  
+     1、数组形式: 循环数组,把数组各项的值作为normalized对象的属性,设置属性值为{from: 数组项的值},其实就是处理成对象格式
+     2、对象形式: 循环对象的key,把key名作为normalized对象的key名,然后判断对象的属性值是否为对象:
+                            是: 将属性值和{ from: 属性名 }合并
+                            否: 将normalized[key]设置为{ from: 属性值 }
+
+其实和规范`props`差不多,只不过这个在属性值为对象的情况下是合并而不是直接替换,最后`from`的意思是表示来源的意思,这个后面也会讲到。
+
+### 规范化Directives
+
+上面已经规范化了`inject`属性和`props`属性,那么继续往下看还要规范化什么:
+```js
+normalizeDirectives(child) //规范化Directives
+```
+可以看到函数名已经说了就是规范化`Directives`,直接看代码:
+```js
+function normalizeDirectives (options: Object) {
+  const dirs = options.directives //缓存options.directives的值
+  if (dirs) {
+    //遍历对象
+    for (const key in dirs) {
+      const def = dirs[key] //获取options.directives对象的key值
+      //值的类型为function类型
+      if (typeof def === 'function') {
+        //重新赋值key值为其添加属性值都为def方法的bind、update属性
+        dirs[key] = { bind: def, update: def }
+      }
+    }
+  }
+}
+```
+可以看到第一段代码获取的是参数的`directives`属性,看到这里就知道`vue`是可以设置全局指令和局部指令,一个是所有组件都可以用的,
+一个是只能当前组件用的。不废话继续往下看,同样是对存在`directives`属性值时做的处理,循环`directives`中的属性名并缓存属性值,
+当属性值为函数时,将属性值替换为`{bind: 属性值, update: 属性值}`,也就是将属性值规范成对象形式的。
+
+### 处理extends和mixins
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

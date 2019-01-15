@@ -13,5 +13,10 @@ var warnings = {
         label: '用户传入的数组形式的props属性中有不是字符串类型的值',
         warn: 'props must be strings when using array syntax.',
         mean: 'props使用数组语法时，数组各项必须是字符串'
+    },
+    4: {
+        label: '用户传入props属性中不是数组或对象',
+        warn: 'Invalid value for option "props": expected an Array or an Object, but got ‘props类型’.',
+        mean: '选项“props”的值无效:期望得到一个数组或对象，但得到其他类型'
     }
 }
