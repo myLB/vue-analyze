@@ -1,4 +1,4 @@
-#创建一个vue实例
+# 创建一个vue实例
 上一章节已经讲vue的所有初始都讲了一遍,下面就来讲下当创建一个vue实例的时候,vue都干了些什么.下面来看一个例子
 
 ```js
@@ -69,7 +69,7 @@ if (options && options._isComponent) {
 首先来讲下第一种,看到这个你会发现不对啊,我在官方文档中没看到这个属性啊,难道是内部的属性？确实是一个内部的属性,这个是创建组件的时候
 会生成的,这里不在多讲,等用到的时候在讲。
 
-###选项的来源
+### 选项的来源
 
 那么现在主要讲第二种情况,可以看到它是执行了`mergeOptions`函数,其参数分别是:`resolveConstructorOptions(vm.constructor)`和创建
 实例时传入的参数`options`,最后将该函数返回的值赋值给实例的`$options`属性。首先来看下第一个参数:
@@ -90,7 +90,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
 用到的时候在讲,在这个例子中是没有`super`属性的,所以最后的结果就是输出`Vue`函数的`options`属性.接下来就可以看`mergeOptions`这个
 函数都干了些什么,这个函数来源于`/core/util/options.js`这个文件.
 
-###检查组件名称是否符合要求
+### 检查组件名称是否符合要求
 
 ```js
 if (process.env.NODE_ENV !== 'production') {
@@ -129,7 +129,7 @@ export function validateComponentName (name: string) {
 可以看到这个函数的作用就是检测组件名是否合格并且是否与`slot`、`component`、`html`标签和`svg`标签名冲突.那么`checkComponents`函数
 就是检测所有的子组件名是否符合要求的。
 
-###选项可以是构造函数
+### 选项可以是构造函数
 
 现在在回到`mergeOptions`函数中来,接下来看其后面的代码:
 ```js
@@ -140,7 +140,7 @@ if (typeof child === 'function') {
 这段代码是为了其他地方做的兼容,在Vue源码中这个函数会在多个地方用到,现在可以提一笔就是`mergeOptions`函数第二个参数可以是构造函数,
 不管是`vue.extend`生成的还是`Vue`函数都是带有options属性的,在现在这个例子中可以忽略。
 
-###规范化props
+### 规范化props
 
 那么现在继续往下看: 
 ```js

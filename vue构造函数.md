@@ -2,7 +2,7 @@
 
  首先`vue`是一个构造函数,通过`new`操作符来生成实例的,那么首先得知道`vue`构造函数都干了什么
  
-##vue构造函数原型
+## vue构造函数原型
 
  打开`entry-runtime-with-compiler.js`可以看到它引入了运行时版的vue
  ```js
@@ -214,7 +214,7 @@ export function installRenderHelpers (target: any) {
 ```
 可以看到为原型添加了很多方法,这些方法其实执行渲染函数的时候会去执行的,这里不做具体解释,等到编译阶段的时候在解释。
 
-##添加全局API
+## 添加全局API
 
 到这里就是`/core/instance/index.js`这个文件对`Vue做的所有事情`,那么前面几个文件还有事情没做完呢.所以我们继续追溯到`core/index`
 这个文件,这个文件其实最主要的是为`Vue`构造函数添加全局API。
@@ -368,7 +368,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
 }
 ```
 
-##Vue平台化
+## Vue平台化
 
 **以上是`core/index.js`文件所做的事情**,接下来在往上追溯就是`platforms/web/runtime/index.js`文件了,这里主要是对`vue`做了平台化的
 包装,在不同的平台添加不同的东西。
@@ -427,7 +427,7 @@ Vue.options = {
     _base: Vue
 }
 ```
-##完整版的vue
+## 完整版的vue
 
 **完整版的vue就是多了一个编译**
 ```js
