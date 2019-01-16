@@ -197,7 +197,7 @@ function normalizeProps (options: Object, vm: ?Component) {
                表示没有类型限制,父组件可以传任何类型的值,没有要求。
            否: 提示错误信息'使用数组语法时，数组各项必须是字符串'
 
-    2、对象形式: 循环该对象属性名,获取属性值,将属性名的驼峰写法改成 kebab-case (短横线分隔命名)写法并作为res对象的属性,
+    2、对象形式: 循环该对象属性名,获取该属性值,将属性名的驼峰写法改成 kebab-case (短横线分隔命名)写法并作为res对象的属性,
                 然后判断属性值是否为纯对象类型[object Object]:
                      是: 直接作为res[属性名]的值
                      否: res[属性名] = {type: 属性值}
@@ -297,11 +297,152 @@ function normalizeDirectives (options: Object) {
 一个是只能当前组件用的。不废话继续往下看,同样是对存在`directives`属性值时做的处理,循环`directives`中的属性名并缓存属性值,
 当属性值为函数时,将属性值替换为`{bind: 属性值, update: 属性值}`,也就是将属性值规范成对象形式的。
 
-### 处理extends和mixins
+### 处理extends
 
+```js
+const extendsFrom = child.extends //缓存extends属性为extendsFrom
+if (extendsFrom) {
+//重新赋值parent为一个原parent和extendsFrom合并的全新对象
+parent = mergeOptions(parent, extendsFrom, vm)
+}
+```
+可以看到首先获取的是`mergeOptions`函数第二个参数的`extends`属性缓存为`extendsFrom`,这个参数主要是用于扩展组件用的(可以是一个
+选项对象或者构造函数,这里主要是选项对象)。当`extendsFrom`存在值时,同样执行`mergeOptions`函数这样就形成了递归,所以我们就先叫它
+`extendsMergeOptions`函数,这个函数的两个参数是:`mergeOptions`函数的第一个参数`parent`和`extendsFrom`变量.那么也就是说
+`extendsFrom`变量会将上面的步骤重新走一遍,后面的等讲完`mergeOptions`函数在举个例子就明了了。现在继续往下看:
 
+### 处理mixins
 
+```js
+if (child.mixins) {
+    for (let i = 0, l = child.mixins.length; i < l; i++) {
+      parent = mergeOptions(parent, child.mixins[i], vm)
+    }
+  }
+```
+其实这个和extends其实相差不多,都是用于扩展的,可以看到`mixins`属性是个数组,它是循环执行`mergeOptions`函数,我们就叫它`mixinsMergeOptions`
+函数,其第一个参数还是`mergeOptions`函数的第一个参数`parent`,第二个是`mixins`数组各项值。同样`mixins`数组各项值又走了遍上面的步骤,
+也是等讲完`mergeOptions`函数来举个完整的例子。现在继续往下看:
 
+### 对合并选项进行最后的处理
+```js
+const options = {}
+let key
+for (key in parent) {
+    // 不管前面mixins || extends是否存在最后都会被option中的属性覆盖
+    mergeField(key)
+}
+for (key in child) {
+    if (!hasOwn(parent, key)) {
+      mergeField(key)
+    }
+}
+function mergeField (key) {
+    const strat = strats[key] || defaultStrat
+    options[key] = strat(parent[key], child[key], vm, key)
+}
+return options
+```
+这是`mergeOptions`函数最后一段代码,可以看到首先是初始化了`options`变量为空对象,然后循环`parent`参数的属性名缓存为`key`变量,在这里再次提一笔,
+在这个例子中,`parent`参数就是`Vue`函数的`options`属性.循环执行了`mergeField`函数,参数`key`为`key`变量,那么`mergeField`函数做了什么呢？
+
+其首先是初始化了`strat`变量,其值为判断参数`key`是否在`strats`对象中?存在则缓存`strats[key]`,不存在则默认是`defaultStrat`变量。在这个
+`mergeOptions`函数中好像没这两个变量啊,那么就往函数外找吧,发现这两个变量也在`/core/util/options.js`这个文件中,但是先把这个两个变量放一放,
+先把`mergeField`函数执行下去,可以看到最后是把参数`key`当做`options`变量的属性名,值先不管,不过可以知道其是执行的`strat`函数,参数是
+`parent[参数key]`、`child[参数key]`、`Vue`实例、参数`key`.
+
+那么前面提到的循环`parent`参数的属性名,也就是说是把所有属性名(包括原型链中的)都拿到了`options`变量中来。在来看后面的是循环`child`参数的属性名,同样是缓存为
+`key`变量,然后是判断的该`key`变量是否存在于`parent`参数对象本身？
+        
+        存在: 不做任何事情
+        不存在(也就是存在于原型链中或没有这个属性): 执行mergeField函数,那也就是说替换了options中已存在参数`key`的属性名。
+        
+总结这段代码的意思就是: 将`parent`参数拿到了`options`变量中,然后将`child`参数中不存在于`parent`参数对象本身的属性名拿出来放入`options`对象中,
+所以有可能是将`options`对象中的属性名替换了,也可能是增加了属性,但替换了的属性值不会变,总的来说就是合并`parent`参数和`child`参数,最后输出一个合并过的
+对象。举个例子:
+```js
+ function cs () {
+    this.data = {
+        count: 2
+    }
+ };
+ cs.prototype = {
+    watch: {}
+ };
+ parent = new cs();
+ child = {
+    methods: {},
+    watch: {}
+}
+// 处理过后...
+options = {
+    data: {count: 2},
+    watch: {},
+    methods: {}
+}
+```
+        
+### 对extends和mixins举例子
+```ecmascript 6
+// 属性值我就不写了
+let mixins = {
+    data: {},
+    mounted () {},
+    created () {}
+}
+let exten = {
+    data: {},
+    watch:{},
+    created () {}
+};
+new Vue({
+    mixins: [mixins],
+    extends: exten,
+    data: {},
+    methods:{}
+})
+Vue.options ={
+  directives: {},
+  components: {},
+  filters: {},
+  _base: Vue
+}
+// extends处理过后
+parent = {
+    directives,
+    components,
+    filters,
+    _base,
+    data,
+    watch,
+    created
+}
+// mixins处理过后
+parent = {
+    directives,
+    components,
+    filters,
+    _base,
+    data,
+    watch,
+    created,
+    mounted
+}
+// 最后处理成
+options = {
+    directives,
+    components,
+    filters,
+    _base,
+    data,
+    watch,
+    created,
+    mounted,
+    methods
+}
+```
+对于属性值的处理会在下一章节讲,这一节就讲这么多,不过可以提前讲下属性值问题,不管前面`parent`、`mixins`还是`extends`是否存在最后都会
+被`options`中的属性覆盖,优先级一定是`child > mixins > extends > parent`.
 
 
 

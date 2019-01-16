@@ -456,18 +456,18 @@ export default Vue
 
 `到这里就讲完了完整版vue的所有初始化所做的事情,所有做的事情就是为vue构造函数或原型添加属性,为运行时或编译做准备,下面这段代码是上面的总结。`
 
-```js
-Vue: {
+```ecmascript 6
+Vue = {
     options: {
         directives: {
             model: {
-                inserted: function() {},
-                componentUpdated: function(){}
+                inserted() {},
+                componentUpdated(){}
             },
             show: {
-                bind: function () {},
-                update: fuction () {},
-                unbind: function () {}
+                bind() {},
+                update() {},
+                unbind() {}
             }
         },
         components: {
@@ -478,13 +478,36 @@ Vue: {
         filters: {},
         _base: Vue
     },
-    compile: function () {},
+    compile() {},
     config: {
          mustUseProp(){},
          isReservedTag(){},
          isReservedAttr(){},
          getTagNamespace(){},
-         isUnknownElement(){}
+         isUnknownElement(){},
+         optionMergeStrategies: {},
+         silent: false,
+         productionTip: process.env.NODE_ENV !== 'production',
+         devtools: process.env.NODE_ENV !== 'production',
+         performance: false,
+         errorHandler: null,
+         warnHandler: null,
+         ignoredElements: [],
+         keyCodes: {},
+         parsePlatformTagName: _ => _,
+         _lifecycleHooks: [
+             'beforeCreate',
+             'created',
+             'beforeMount',
+             'mounted',
+             'beforeUpdate',
+             'updated',
+             'beforeDestroy',
+             'destroyed',
+             'activated',
+             'deactivated',
+             'errorCaptured'
+         ]
     },
     FunctionalRenderContext,
     version,
