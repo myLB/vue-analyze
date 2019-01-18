@@ -48,5 +48,10 @@ var warnings = {
         label: '属性或方法没有在实例上定义',
         warn: 'Property or method "${key}" is not defined on the instance but referenced during render. Make sure that this property is reactive,  either in the data option, or for class-based components, by initializing the property.',
         mean: '属性或方法“${key}”不是在实例上定义的，而是在呈现过程中引用的。通过初始化该属性，确保该属性是反应性的，无论是在data选项中，还是在基于类的组件中。'
+    },
+    11: {
+        label: '没有在父组件中定义事件对应的函数',
+        warn: 'Invalid handler for event "${event.name}": got undefined',
+        mean: '事件event.name的无效处理程序: 获得undefined'
     }
 }
