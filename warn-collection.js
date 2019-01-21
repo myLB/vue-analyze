@@ -53,5 +53,25 @@ var warnings = {
         label: '没有在父组件中定义事件对应的函数',
         warn: 'Invalid handler for event "${event.name}": got undefined',
         mean: '事件event.name的无效处理程序: 获得undefined'
-    }
+    },
+    12: {
+        label: '修改了$attrs对象中的属性',
+        warn: '$attrs is readonly',
+        mean: '$attrs是只读属性'
+    },
+    13: {
+        label: '修改了$listeners对象中的属性',
+        warn: '$listeners is readonly',
+        mean: '$listeners是只读属性'
+    },
+    14: {
+        label: 'Injection对象中"${key}"没有设置默认值 || 在祖先组件中没有找到对应的属性以及值',
+        warn: 'Injection "${key}" not found',
+        mean: '没有找到注入“${key}”'
+    },
+    15: {
+        label: '修改了injection对象中属性的值,因为当提供该值组件刷新时,值又还原了',
+        warn: 'Avoid mutating an injected value directly since the changes will be overwritten whenever the provided component re-renders. injection being mutated: "${key}"',
+        mean: '避免直接改变注入的值，因为当提供的组件重新呈现时，更改将被覆盖。"${key}"注入被突变'
+    },
 }
