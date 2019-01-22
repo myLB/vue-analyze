@@ -74,4 +74,29 @@ var warnings = {
         warn: 'Avoid mutating an injected value directly since the changes will be overwritten whenever the provided component re-renders. injection being mutated: "${key}"',
         mean: '避免直接改变注入的值，因为当提供的组件重新呈现时，更改将被覆盖。"${key}"注入被突变'
     },
+    16: {
+        label: 'prop的默认值为对象或数组时没有以函数的形式输出',
+        warn: 'Invalid default value for prop ${key} Props with type Object/Array must use a factory function to return the default value.',
+        mean: '类型为Object/Array的prop ${key}道具的默认值无效，必须使用工厂函数返回默认值。'
+    },
+    17: {
+        label: 'props最后处理的属性值与期望的不符',
+        warn: 'Invalid prop: type check failed for prop "${name}". Expected 类型, got 类型 ',
+        mean: 'prop 无效: prop检验失败。期望${type}类型, 实际${type}类型'
+    },
+    18: {
+        label: 'props最后处理的属性值不符合自定义验证函数,函数无值返回或返回了false',
+        warn: 'Invalid prop: custom validator check failed for prop ${name}',
+        mean: 'prop 无效: 自定义验证器检查`prop`失败'
+    },
+    19: {
+        label: 'props中的属性名与',
+        warn: '${key} is a reserved attribute and cannot be used as component prop.',
+        mean: '${key}是一个保留属性,不能用作组件prop。'
+    },
+    20: {
+        label: '修改了实例中_props的属性值',
+        warn: 'Avoid mutating a prop directly since the value will be overwritten whenever the parent component re-renders. Instead, use a data or computed property based on the prop\'s value. Prop being mutated: ${key}',
+        mean: '避免直接修改道具，因为当父组件重新呈现时，该值将被覆盖。相反，使用基于道具价值的数据或计算属性。道具是突变: ${key}'
+    },
 }
