@@ -99,4 +99,44 @@ var warnings = {
         warn: 'Avoid mutating a prop directly since the value will be overwritten whenever the parent component re-renders. Instead, use a data or computed property based on the prop\'s value. Prop being mutated: ${key}',
         mean: '避免直接修改道具，因为当父组件重新呈现时，该值将被覆盖。相反，使用基于道具价值的数据或计算属性。道具是突变: ${key}'
     },
+    21: {
+        label: 'methods中的方法值为null或undefined,也就是未定义',
+        warn: 'Method "${key}" has an undefined value in the component definition. Did you reference the function correctly?',
+        mean: '方法“${key}”在组件定义中有一个未定义的值。你正确地引用了函数吗?'
+    },
+    22: {
+        label: 'methods中的属性名与props中的属性名冲突了',
+        warn: 'Method "${key}" has already been defined as a prop.',
+        mean: '方法“${key}”已经被定义为一个prop。'
+    },
+    23: {
+        label: 'methods中的属性名与实例中的属性名冲突了',
+        warn: 'Method "${key}" conflicts with an existing Vue instance method.  Avoid defining component methods that start with _ or $.',
+        mean: '方法“${key}”与现有的Vue实例方法冲突。避免定义以_或$开头的组件方法。'
+    },
+    24: {
+        label: 'data函数返回的不是对象',
+        warn: 'data functions should return an object: https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
+        mean: '数据函数应该返回一个对象'
+    },
+    25: {
+        label: '计算属性的值未定义或者格式写法不正确',
+        warn: 'Getter is missing for computed property "${key}".',
+        mean: '计算属性“${key}”缺少Getter。'
+    },
+    26: {
+        label: '计算属性与data中的属性冲突',
+        warn: 'The computed property "${key}" is already defined in data.',
+        mean: '计算属性“${key}”已经在data中定义。'
+    },
+    27: {
+        label: '计算属性与props中的属性冲突',
+        warn: 'The computed property "${key}" is already defined as a prop.',
+        mean: '计算属性“${key}”已经定义为一个prop。'
+    },
+    27: {
+        label: '计算属性的set函数没有定义',
+        warn: 'Computed property "${key}" was assigned to but it has no setter.',
+        mean: '已分配计算属性“${key}”，但它没有setter。'
+    },
 }
