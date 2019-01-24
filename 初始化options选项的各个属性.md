@@ -221,11 +221,11 @@ str = true
 `validateProp`函数总结: 对父组件未传值或传了值以及子组件设置了默认值和未设置默认值进行处理,然后对处理的值进行指定类型验证或自定义函数验证,对不符合类型的值
 提示不同的警告信息,最后把处理完的`value`值输出.
 
-继续回到`initProps`函数中来,这个时候已经获取处理完的`prop`值了并缓存为变量`value`.然后在生产环境和非生产环境下都为实例的`_props`
+继续回到`initProps`函数中来,这个时候已经获取处理完的`prop`值了并缓存为变量`value`.然后在生产环境和非生产环境下都为实例的`_props`对象中的
 属性重写了描述符(相当于添加了拦截器),但在非生产环境下会对`props`属性名进行检测,如果与`key`,`ref`,`slot`,`slot-scope`,`is`,
 `style`,`class`的键名冲突时提示警告信息'属性名是保留属性,不能用作子组件接收`prop`'.当修改`_props`的属性值时提示'避免修改`_props`
 属性数据,当父组件重新渲染时,修改的值又将被覆盖'。最后是将`_props`的属性添加到实例上,并为实例的该属性添加重写描述符,当读取实例的该属性
-值时,相当于读取`_props`的该属性值
+值时,相当于读取`_props`的该属性值。在这里有一个细节没讲,就是为重写描述符,其执行了一个`defineReactive`函数,这个函数会在下一章节细讲。
 
 ## initMethods
 
@@ -342,7 +342,7 @@ function initData (vm: Component) {
 当获取的值不为对象时,设置值为空对象进行兼容,并在非生产环境下提示错误信息'`data`数据不是对象'。接下来就是循环`data`对象中的属性名,对
 属性名进行验证是否与`methods`对象中的属性名冲突,冲突提示'方法名已经被定义为一个`data`属性';与`props`对象中的属性名冲突时提示警告信
 息'该属性已被定义为`prop`';与`props`对象中的属性名不冲突&&属性名的第一个字符不是`$`或`_`时,将属性名添加到实例上,但值获取的是`_data`
-中的属性值。最后是为`data`添加被观察者实例属性`__ob__`和观察者收集器`dep`,也就是执行了`observe`函数,这个下一章节会讲
+中的属性值。最后是为`data`添加被观察者实例属性`__ob__`和观察者收集器`dep`,也就是执行了`observe`函数,这个下一章节会讲。
 
 ## initComputed
 
@@ -512,8 +512,58 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
 }
 ```
-看函数名就知道是创建观察者用的.首先是当属性值或数组的项值为对象时,
+看函数名就知道是创建观察者用的.首先是当属性值或数组的项值为对象时,缓存属性值为`option`变量,值改变时的监听函数为`handler`变量;如果属性
+值或数组的选项为字符串时,表示其引用的是实例上的方法,将其赋值给`handler`变量。最后输出的是实例的`$watch`函数,参数是属性名、监听函数、
+属性值,说明`$watch`也是用来创建观察者实例并且将这个`api`暴露了出来.在`createWatcher`函数中可以看到,其属性名可以是一个函数,具体在这
+里没怎么体现出来,那么去`$watch`函数中看看,这个函数已经在初始化构造函数的时候添加的。
 
+```ecmascript 6
+Vue.prototype.$watch = function (
+    expOrFn: string | Function,//watch的key可以是函数
+    cb: any,
+    options?: Object
+  ){
+    const vm: Component = this
+    //这个是给用this.$watch直接设置准备的并且cb为对象(包含handler方法的对象)
+    if (isPlainObject(cb)) {
+      return createWatcher(vm, expOrFn, cb, options)
+    }
+    options = options || {}
+    options.user = true
+    //生成一个Watcher实例
+    /*
+      如果expOrFn是一个函数比如
+        this.$watch(function () {
+          return this.k
+        }, () => {console.log(333)}, {
+          immediate: true
+        })
+      这个时候创建实例的时候回执行这个watcher实例的get(),读取了this.k,这个时候Dep.target是这个watcher
+      实例,那么就把这个watcher实例添加到了私有的Dep中,当this.k改变时会执行所有(Dep中subs数组中)watcher
+      实例的update(),将这些watcher实例放入观察者队列中
+    */
+    const watcher = new Watcher(vm, expOrFn, cb, options)
+    /*立即执行这个函数*/
+    if (options.immediate) {
+      cb.call(vm, watcher.value)
+    }
+    /*返回一个在_watchers中删除自身watcher实例的方法*/
+    return function unwatchFn () {
+      watcher.teardown()
+    }
+  }
+```
+可以看到这个就是`Vue`暴露出来的创建观察者实例`api`,其三个参数分别为: 想要监听的数据(可以是个函数)、监听的数据变化的要执行回调函数、
+额外的一些选项(比如文档上的`deep`、`immediate`).当设置的回调函数是一个对象时,结束该函数去执行`createWatcher`函数,确保监听函数和额
+外的选项分开成两个参数,最后又回到了`$watch`函数.接下来可以看到其为额外的选项对象添加了一个`user`属性,这个表示是手动生成的观察者实例。
+然后就是创建了观察者实例,参数是: 实例、监听的数据、回调函数、额外的一些选项。将生成的观察者实例赋值给`watcher`变量,接着是判断额外选
+项中是否存在`immediate`属性,发现当其存在并且值为`true`时,会立即执行回调函数,那么这个属性就很好理解,就是在初始化的立即执行回调函数用
+的。最后`$watch`函数是返回了一个`unwatchFn`函数,其内部只是执行了观察者实例的`teardown`函数,也不知道是干什么的,那么也等下一章节在讲。
+
+
+## 总结
+这一章节主要讲了初始化`options`选项中的`props`、`data`、`methods`、`watch`,以及在初始化中提到的观察者、被观察者还有观察者收集器,
+在这一章节中都只是粗略的提了下,具体会在下一章讲解并举例说明。
 
 
 
