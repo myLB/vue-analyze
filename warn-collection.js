@@ -134,9 +134,19 @@ var warnings = {
         warn: 'The computed property "${key}" is already defined as a prop.',
         mean: '计算属性“${key}”已经定义为一个prop。'
     },
-    27: {
+    28: {
         label: '计算属性的set函数没有定义',
         warn: 'Computed property "${key}" was assigned to but it has no setter.',
         mean: '已分配计算属性“${key}”，但它没有setter。'
+    },
+    29: {
+        label: 'watch的属性值写法不对(比如arr.)',
+        warn: 'Failed watching path: "${expOrFn}"  Watcher only accepts simple dot-delimited paths. For full control, use a function instead.',
+        mean: '失败的监视路径:“${expOrFn}”监视程序只接受简单的点分隔路径。对于完全控制，使用函数代替。'
+    },
+    30: {
+        label: 'watch的某个属性的回调函数报错',
+        warn: 'callback for watcher "${this.expression}"',
+        mean: '观察者“${this.expression}”的回调'
     },
 }
