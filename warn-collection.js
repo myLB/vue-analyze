@@ -149,4 +149,14 @@ var warnings = {
         warn: 'callback for watcher "${this.expression}"',
         mean: '观察者“${this.expression}”的回调'
     },
+    31: {
+        label: '用的vue版本不对,没用完整版的',
+        warn: 'You are using the runtime-only build of Vue where the template compiler is not available. Either pre-compile the templates into render functions, or use the compiler-included build.',
+        mean: '您正在使用仅在运行时构建的Vue，其中模板编译器不可用。要么将模板预编译成呈现函数，要么使用编译器包含的构建。'
+    },
+    32: {
+        label: '组件加载失败或者render函数未定义(一般用的是运行时的Vue版本)',
+        warn: 'Failed to mount component: template or render function not defined.',
+        mean: '加载组件失败:模板或呈现函数未定义。'
+    },
 }

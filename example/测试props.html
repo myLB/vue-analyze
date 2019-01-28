@@ -2,35 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>测试inject</title>
+    <title>测试props</title>
     <script src="./vue.js"></script>
 </head>
 <body>
 <div id="app">
-    <ce-inject></ce-inject>
+    <ce-props :obj="obj" :data="data"></ce-props>
     <div>
         <button @click="changeData">按我会发现爱好变了</button>
     </div>
 </div>
 <script>
-    Vue.component('ce-inject',{
+    Vue.component('ce-props',{
         template: `<div>
-                        <button @click="changeObjAttr">点击我改变姓名但是没有刷新视图</button>
-                        <button @click="changeObj">点击我改变姓名</button>
+                        <button @click="changeObj">点击我改变姓名但是报错了</button>
+                        <button @click="changeLongAttr">点击我改变特长</button>
                         <p>姓名:{{obj.name}}</p>
                         <p>爱好:{{data.label}}</p>
+                        <p>特长:{{long.label}}</p>
                   </div>`,
-        inject: ['obj','data'],
+        props: {
+            obj: {},
+            data: {},
+            long: {
+                type: Object,
+                default: () => ({label: '跑步'})
+            }
+        },
         methods: {
             changeObj() {
                 this.obj = {
                     name: 'bin'
                 }
             },
-            changeObjAttr () {
-                this.obj.name = 'liBin'
-                console.log(this.obj.name)
+            changeLongAttr () {
+                this.long.label = '打球';
+                console.log(this.long.label)
             }
+        },
+        mounted () {
+            console.log(this)
         }
     })
     new Vue({
@@ -38,14 +49,9 @@
         data: {
             data: {
                 label: '没有'
-            }
-        },
-        provide () {
-            return {
-                obj: {
-                    name: 'li'
-                },
-                data: this.data
+            },
+            obj: {
+                name: 'li'
             }
         },
         methods: {
