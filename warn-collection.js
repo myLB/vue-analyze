@@ -1,4 +1,4 @@
-var warnings = {
+let warnings = {
     1: {
         label: '组件名不合格',
         warn: 'Invalid component name: 组件名. Component names can only contain alphanumeric characters and the hyphen, and must start with a letter.',
