@@ -159,4 +159,9 @@ let warnings = {
         warn: 'Failed to mount component: template or render function not defined.',
         mean: '加载组件失败:模板或呈现函数未定义。'
     },
+    33: {
+        label: 'v-for和slot-scope不要同时使用,因为slot-scope主要针对slot,同时在一个标签上使用其实就是覆盖slot,最后还是只有一个生效',
+        warn: 'Ambiguous combined usage of slot-scope and v-for on <${el.tag}> (v-for takes higher priority). Use a wrapper <template> for the scoped slot to make it clearer.',
+        mean: '在使用v-for的标签里套一个template,在template上使用slot-scope，这样更清晰'
+    }
 }
